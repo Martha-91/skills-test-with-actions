@@ -15,18 +15,29 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  markdown-lint:
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Install markdown lint dependencies
-        run: npm install remark-cli remark-preset-lint-consistent
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'  # Use the latest stable Node.js version
 
-      - name: Run markdown lint
-        run: npx remark . --use remark-preset-lint-consistent --frail
+    - name: Cache node modules
+      uses: actions/cache@v3
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node_modules-
+
+    - name: Install markdown lint dependencies
+      run: npm install remark-cli remark-preset-lint-consistent
+
+    - name: Run markdown lint
+      run: npx remark . --use remark-preset-lint-consistent --frail
+
